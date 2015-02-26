@@ -5,7 +5,6 @@ package xingapi
 import (
 	"github.com/garyburd/go-oauth/oauth"
 	"github.com/etix/stoppableListener"
-	"github.com/str1ngs/ansi/color"
 	"fmt"
 	"log"
 	"net"
@@ -49,7 +48,7 @@ func (authenticator *OAuthAuthenticator) Authenticate(handler AuthenticationHand
 	err = http.Serve(authenticator.listener, nil)
 
 	if err != nil {
-		log.Fatal(err)
+		authenticator.authenticateHandler(err)
 	}
 }
 
@@ -75,19 +74,14 @@ func (authenticator *OAuthAuthenticator)OauthClient() (oauth.Client) {
 }
 
 func (authenticator *OAuthAuthenticator) getRequestToken() error {
-	println("Get request token...")
-	
 	authenticator.Client = authenticator.OauthClient()
 	httpClient := new(http.Client)
 	cred, err := authenticator.Client.RequestTemporaryCredentials(httpClient, "http://localhost:8080/", nil)
 	if err == nil {
 		authenticator.TemporaryCredentials = *cred
-		println("Received token:%s", authenticator.TemporaryCredentials.Token, " - secret:%s", authenticator.TemporaryCredentials.Secret)
-
 		tc := authenticator.TemporaryCredentials
 		accessUrl := authenticator.Client.AuthorizationURL(&tc, nil)
-		print("Please paste this url into your browser:")
-		color.Print("m", fmt.Sprintf("%s%s", accessUrl, "\n"))
+		PrintMessageWithParam("Please paste this url into your browser:", accessUrl)
 	}
 
 	return err

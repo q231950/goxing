@@ -23,3 +23,8 @@ func PrintResponse(response *http.Response) {
 func PrintCommand(command string) {
 	color.Printf("c", fmt.Sprintf("GET %s", command))
 }
+
+func  PrintMessageWithParam(message string, param string) {
+	print(message)
+	color.Print("m", fmt.Sprintf("%s%s", param, "\n"))
+}
