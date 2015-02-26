@@ -6,6 +6,7 @@ import (
 	"os"
 	"xingapi"
 	"fmt"
+	// "bufio"
 )
 
 func main() {
@@ -24,13 +25,10 @@ func main() {
 
 				client := new(xingapi.Client)
 				client.Me(func(me xingapi.User) {
-						color.Printf("+g", fmt.Sprintf("-----------------------------------\n%s:\n", me.DisplayName))
-						color.Printf("g", fmt.Sprintf("Email address:\t\t%s\nDate of birth:\t\t%s\n", me.ActiveEmail, me.Birthdate))
+						color.Printf("", fmt.Sprintf("-----------------------------------\n%s:\n", me.DisplayName))
+						color.Printf("d", fmt.Sprintf("Email address:\t\t%s\nDate of birth:\t\t%s\n", me.ActiveEmail, me.Birthdate))
 
-						// reader := bufio.NewReader(os.Stdin)
-						// fmt.Print("Enter text: ")
-						// text, _ := reader.ReadString('\n')
-						// fmt.Println(text)
+						client.Contacts(me.Id, func() {})
 					})
 			},
 		},
@@ -43,6 +41,12 @@ func main() {
 			},
 		},
 	}
+
+						// reader := bufio.NewReader(os.Stdin)
+						// fmt.Print("Enter text: ")
+						// text, _ := reader.ReadString('\n')
+						// fmt.Println(text)
+
 
 	app.Run(os.Args)
 }

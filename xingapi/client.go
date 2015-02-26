@@ -21,14 +21,12 @@ func (client *Client)Me(handler MeHandler) {
 	client.meHandler = handler
 	consumer := new(OAuthConsumer)
 	client.OAuthConsumer = *consumer
-
+	// client.OAuthConsumer.Connect()
 	client.OAuthConsumer.Get("/v1/users/me", url.Values{}, client.MeResponseHandler)
-	client.OAuthConsumer.Connect()
 }
 
-func (client *Client)contacts(userID string, handler func()) {
-
-	client.OAuthConsumer.Get("/v1/users/21167384_1730ce/contacts", url.Values{}, client.ContactsResponseHandler)
+func (client *Client)Contacts(userID string, handler func()) {	
+	client.OAuthConsumer.Get("/v1/users/"+ userID + "/contacts", url.Values{}, client.ContactsResponseHandler)
 }
 
 func (client *Client)ContactsResponseHandler(reader io.Reader) {

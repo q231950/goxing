@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	)
 
-type JSONMarshaler struct {}
-
 type UsersMarshaler interface {
 	MarshalUsers(writer io.Writer, users Users) error
 }
@@ -23,6 +21,9 @@ type CredentialsMarshaler interface {
 type CredentialsUnmarshaler interface {
 	UnmarshalCredentials(reader io.Reader) (Credentials, error)
 }
+
+
+type JSONMarshaler struct {}
 
 func (JSONMarshaler) MarshalUsers(writer io.Writer, users Users) error {
 	encoder := json.NewEncoder(writer)

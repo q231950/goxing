@@ -27,45 +27,47 @@ type OAuthConsumer struct {
 	listener *stoppableListener.StoppableListener
 }
 
-func (consumer *OAuthConsumer) Connect() {
+func (consumer *OAuthConsumer) Connect(handler AuthenticateHandler) {
 	
-	// credentialStore := new(CredentialStore)
-	// storedCredentials, _ := credentialStore.Credentials()
-	// println("+++" + storedCredentials.Token + " " + storedCredentials.Secret + "+++")
-
-	// client := new(oauth.Client)
-	// client.Credentials = consumer.OAuthConsumerCredentials()
-	// httpClient := new(http.Client)
-	// url := "https://api.xing.com/v1/users/me"
-	// credentials := oauth.Credentials{storedCredentials.Token, storedCredentials.Secret}
+	credentialStore := new(CredentialStore)
+	storedCredentials, _ := credentialStore.Credentials()
 	
-	// resp, _ := client.Get(httpClient, &credentials, url, nil)
-	// consumer.PrintResponse(resp)
-	// defer resp.Body.Close()
+	if consumer.Authenticated {
+		consumer.HandleAuthentication()
 
-	err := consumer.getRequestToken()
-	if err != nil {
-		log.Fatal("Connect:", err)
-	}
+	} else if (0 < len(storedCredentials.Token)) {
+		println("Authenticating with " + storedCredentials.Token + " " + storedCredentials.Secret + ".")
 
-	listener, err := net.Listen("tcp", "127.0.0.1:8080")
+		consumer.Client.Credentials = consumer.OAuthConsumerCredentials()
+		consumer.Authenticated = true
+		consumer.OAuthCredentials = oauth.Credentials{storedCredentials.Token, storedCredentials.Secret}
+		
+		consumer.HandleAuthentication()
+	} else {
+		err := consumer.getRequestToken()
+		if err != nil {
+			log.Fatal("Connect:", err)
+		}
 
-	consumer.listener = stoppableListener.Handle(listener)
+		listener, err := net.Listen("tcp", "127.0.0.1:8080")
 
-	/* Handle SIGTERM (Ctrl+C) */
-	k := make(chan os.Signal, 1)
-	signal.Notify(k, os.Interrupt)
-	go func() {
-		<-k
-		consumer.listener.Stop <- true
-	}()
+		consumer.listener = stoppableListener.Handle(listener)
 
-	http.HandleFunc("/", consumer.onReceiveTemporaryVerifierAndToken)
+		/* Handle SIGTERM (Ctrl+C) */
+		k := make(chan os.Signal, 1)
+		signal.Notify(k, os.Interrupt)
+		go func() {
+			<-k
+			consumer.listener.Stop <- true
+		}()
 
-	err = http.Serve(consumer.listener, nil)
+		http.HandleFunc("/", consumer.onReceiveTemporaryVerifierAndToken)
 
-	if err != nil {
-		log.Fatal(err)
+		err = http.Serve(consumer.listener, nil)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -131,19 +133,29 @@ func (consumer *OAuthConsumer)onReceiveTemporaryVerifierAndToken(w http.Response
     fmt.Fprintf(w, "</body></html>")
 }
 
-func (consumer *OAuthConsumer)Get(path string, parameters url.Values, handler ResponseHandler) {
+func (consumer *OAuthConsumer) Get(path string, parameters url.Values, handler ResponseHandler) {	
 	consumer.AddAuthenticationHandler(func () {
-		httpClient := new(http.Client)
-		url := "https://api.xing.com" + path
-		credentials := consumer.OAuthCredentials
-		resp, _ := consumer.Client.Get(httpClient, &credentials, url, parameters)
-		consumer.PrintResponse(resp)
-		handler(resp.Body)
-		defer resp.Body.Close()
-	})
+			httpClient := new(http.Client)
+			url := "https://api.xing.com" + path
+			credentials := consumer.OAuthCredentials
+			resp, _ := consumer.Client.Get(httpClient, &credentials, url, parameters)
+			color.Printf("c", fmt.Sprintf("GET %s\n", path))
+			consumer.PrintResponse(resp)
+			if resp.StatusCode == 200 {
+				handler(resp.Body)
+			} 
+
+			defer resp.Body.Close()
+		})
+
+	if !consumer.Authenticated {
+		consumer.Connect(func (){
+			consumer.HandleAuthentication()
+		})
+	}
 }
 
-func (consumer *OAuthConsumer)PrintResponse(response *http.Response) {
+func (consumer *OAuthConsumer) PrintResponse(response *http.Response) {
 	var colorCode string
 	if (response.StatusCode == 200) {
 		colorCode = "g"
@@ -153,7 +165,7 @@ func (consumer *OAuthConsumer)PrintResponse(response *http.Response) {
 	color.Printf(colorCode, fmt.Sprintf("%s\n", response.Status))
 }
 
-func (consumer *OAuthConsumer)AddAuthenticationHandler(handler AuthenticateHandler) {
+func (consumer *OAuthConsumer) AddAuthenticationHandler(handler AuthenticateHandler) {
 	if consumer.AuthenticateHandlers == nil {
 		consumer.AuthenticateHandlers = []AuthenticateHandler{}
 	}
@@ -165,7 +177,9 @@ func (consumer *OAuthConsumer)AddAuthenticationHandler(handler AuthenticateHandl
 	}
 }
 
-func (consumer *OAuthConsumer)HandleAuthentication() {
+func (consumer *OAuthConsumer) HandleAuthentication() {
+	consumer.Authenticated = true
+	println("handle authentication")
 	for _, authenticateHandler := range consumer.AuthenticateHandlers {
 		authenticateHandler()
 	}
