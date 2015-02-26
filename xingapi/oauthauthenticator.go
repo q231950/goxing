@@ -6,7 +6,6 @@ import (
 	"github.com/garyburd/go-oauth/oauth"
 	"github.com/etix/stoppableListener"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -27,25 +26,21 @@ func (authenticator *OAuthAuthenticator) Authenticate(handler AuthenticationHand
 
 	authenticator.authenticateHandler = handler
 	err := authenticator.getRequestToken()
-	if err != nil {
-		log.Fatal("Authenticate:", err)
+	
+	if err == nil {
+		listener, _ := net.Listen("tcp", "127.0.0.1:8080")
+		authenticator.listener = stoppableListener.Handle(listener)
+
+		k := make(chan os.Signal, 1)
+		signal.Notify(k, os.Interrupt)
+		go func() {
+			<-k
+			authenticator.listener.Stop <- true
+		}()
+
+		http.HandleFunc("/", authenticator.onReceiveTemporaryVerifierAndToken)
+		err = http.Serve(authenticator.listener, nil)
 	}
-
-	listener, err := net.Listen("tcp", "127.0.0.1:8080")
-
-	authenticator.listener = stoppableListener.Handle(listener)
-
-	/* Handle SIGTERM (Ctrl+C) */
-	k := make(chan os.Signal, 1)
-	signal.Notify(k, os.Interrupt)
-	go func() {
-		<-k
-		authenticator.listener.Stop <- true
-	}()
-
-	http.HandleFunc("/", authenticator.onReceiveTemporaryVerifierAndToken)
-
-	err = http.Serve(authenticator.listener, nil)
 
 	if err != nil {
 		authenticator.authenticateHandler(err)
@@ -63,7 +58,7 @@ func (authenticator *OAuthAuthenticator)OAuthConsumerCredentials() (oauth.Creden
 	return oauth.Credentials {credentials.Token, credentials.Secret}
 }
 
-func (authenticator *OAuthAuthenticator)OauthClient() (oauth.Client) {
+func (authenticator *OAuthAuthenticator) oAuthClient() (oauth.Client) {
 	client := new(oauth.Client)
 	client.Credentials = authenticator.OAuthConsumerCredentials()
 	client.TemporaryCredentialRequestURI = "https://api.xing.com/v1/request_token"
@@ -74,7 +69,7 @@ func (authenticator *OAuthAuthenticator)OauthClient() (oauth.Client) {
 }
 
 func (authenticator *OAuthAuthenticator) getRequestToken() error {
-	authenticator.Client = authenticator.OauthClient()
+	authenticator.Client = authenticator.oAuthClient()
 	httpClient := new(http.Client)
 	cred, err := authenticator.Client.RequestTemporaryCredentials(httpClient, "http://localhost:8080/", nil)
 	if err == nil {
@@ -83,21 +78,15 @@ func (authenticator *OAuthAuthenticator) getRequestToken() error {
 		accessUrl := authenticator.Client.AuthorizationURL(&tc, nil)
 		PrintMessageWithParam("Please paste this url into your browser:", accessUrl)
 	}
-
 	return err
 }
 
 func (authenticator *OAuthAuthenticator)onReceiveTemporaryVerifierAndToken(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-
 	verifier, _ := r.Form["oauth_verifier"]
 	token, _ := r.Form["oauth_token"]
-
 	fmt.Fprintf(w, "<html><head></head><body>")
 	if (0 < len(verifier) && 0 < len(token)) {
-		println("Temporary verfifier:", verifier[0])
-		println("Temporary token:", token[0])
-		
 		httpClient := new(http.Client)
 		tc := authenticator.TemporaryCredentials
 		credentials, _, err := authenticator.Client.RequestToken(httpClient, &tc, verifier[0])

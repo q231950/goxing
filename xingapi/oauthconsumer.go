@@ -20,9 +20,8 @@ type OAuthConsumer struct {
 func (consumer *OAuthConsumer) authenticate(handler AuthenticateHandler) {
 	
 	if consumer.Authenticated {
-		consumer.handleAuthentication()
+		handler()
 	} else {
-		
 		credentialStore := new(CredentialStore)
 		storedCredentials, localeCredentialsError := credentialStore.Credentials()
 
@@ -30,21 +29,21 @@ func (consumer *OAuthConsumer) authenticate(handler AuthenticateHandler) {
 			consumer.oauthAuthenticator = new(OAuthAuthenticator)
 			consumer.oauthAuthenticator.AuthenticateUsingStoredCredentials(storedCredentials, func(err error) {
 				if err == nil {
-					consumer.Authenticated = true
 					consumer.handleAuthentication()
 				}
 			})
 		} else {
-			consumer.requestCredentials()
+			consumer.requestCredentials(handler)
 		}
 	}
 }
 
-func (consumer *OAuthConsumer) requestCredentials() {
+func (consumer *OAuthConsumer) requestCredentials(handler func()) {
 	consumer.oauthAuthenticator = new(OAuthAuthenticator)
 	consumer.oauthAuthenticator.Authenticate(func(err error) {
-		consumer.Authenticated = true
-		consumer.handleAuthentication()
+		if err == nil {
+			handler()
+		}
 	})
 }
 
