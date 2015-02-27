@@ -22,6 +22,16 @@ type CredentialsUnmarshaler interface {
 	UnmarshalCredentials(reader io.Reader) (Credentials, error)
 }
 
+type ContactsListUnmarshaler interface {
+	UnmarshalContactsList(reader io.Reader) (ContactsList, error)
+}
+
+type UserUnmarshaler interface {
+	UnmarshalUser(reader io.Reader) (User, error)
+}
+
+
+
 
 type JSONMarshaler struct {}
 
@@ -48,4 +58,25 @@ func (JSONMarshaler) UnmarshalCredentials(reader io.Reader) (Credentials, error)
 	var credentials Credentials
 	err := decoder.Decode(&credentials)
 	return credentials, err
+}
+
+func (JSONMarshaler) UnmarshalContactsList(reader io.Reader) (ContactsList, error) {
+
+	decoder := json.NewDecoder(reader)
+	var jsonlist JSONContactsList
+	err := decoder.Decode(&jsonlist)
+	list := new(ContactsList)
+
+	if err == nil {
+		list.Total = jsonlist.JSONContactsUserIdList.Total
+		list.UserIds = jsonlist.JSONContactsUserIdList.UserIds()
+	}
+	return *list, err
+}
+
+func (JSONMarshaler) UnmarshalUser(reader io.Reader) (User, error) {
+	var marshaler UsersUnmarshaler
+	marshaler = JSONMarshaler{}
+	users, err := marshaler.UnmarshalUsers(reader)
+	return *users.Users[0], err
 }

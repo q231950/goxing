@@ -23,21 +23,29 @@ func main() {
 			Usage:     "Get my profile",
 			Action: func(c *cli.Context) {
 
-				client := new(xingapi.Client)
+				client := new(xingapi.Client)	
 				client.Me(func(me xingapi.User) {
-						color.Printf("", fmt.Sprintf("-----------------------------------\n%s:\n", me.DisplayName))
-						color.Printf("d", fmt.Sprintf("Email address:\t\t%s\nDate of birth:\t\t%s\n", me.ActiveEmail, me.Birthdate))
-
-						client.Contacts(me.Id, func() {})
-					})
+						xingapi.PrintUser(me)
+				})
 			},
 		},
 		{
-			Name:      "complete",
+			Name:      "Contacts",
 			ShortName: "c",
-			Usage:     "complete a task on the list",
+			Usage:     "Get contacts for the given user id: c <userid>",
 			Action: func(c *cli.Context) {
-				println("completed task: ", c.Args().First())
+				userid := c.Args().First()
+				client := new(xingapi.Client)
+				client.ContactsList(userid, func(list xingapi.ContactsList) {
+					color.Printf("", "-----------------------------------\nContacts\n")
+					color.Printf("d", fmt.Sprintf("\t\t[%d]\n%s\n", list.Total, list.UserIds))
+
+					for _, contactUserId := range list.UserIds {
+						client.User(contactUserId, func(user xingapi.User) {
+							xingapi.PrintUser(user)
+						})
+					}
+				})
 			},
 		},
 	}
