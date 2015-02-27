@@ -14,7 +14,6 @@ func (jsonList *JSONContactsUserIdList) UserIds() []string {
 	userIds := []string{}
 
 	for _, idMap := range jsonList.Users {
-		println(idMap)
 		userIds = append(userIds, idMap["id"])
 	}
 
