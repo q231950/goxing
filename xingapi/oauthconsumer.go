@@ -83,7 +83,6 @@ func (consumer *OAuthConsumer) addAuthenticationHandler(handler AuthenticateHand
 
 func (consumer *OAuthConsumer) handleAuthentication() {
 	consumer.Authenticated = true
-	println("handle authentication")
 	for _, authenticateHandler := range consumer.AuthenticateHandlers {
 		authenticateHandler()
 	}

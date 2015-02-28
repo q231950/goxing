@@ -21,7 +21,7 @@ func PrintResponse(response *http.Response) {
 }
 
 func PrintCommand(command string) {
-	color.Printf("c", fmt.Sprintf("GET %s", command))
+	color.Printf("c", fmt.Sprintf("%s", command))
 }
 
 func  PrintMessageWithParam(message string, param string) {
@@ -32,4 +32,8 @@ func  PrintMessageWithParam(message string, param string) {
 func PrintUser(user User) {
 	color.Printf("", fmt.Sprintf("-----------------------------------\n%s <%s>:\n", user.DisplayName, user.Id))
 	color.Printf("d", fmt.Sprintf("Email address:\t\t%s\nDate of birth:\t\t%s\n", user.ActiveEmail, user.Birthdate))
+}
+
+func PrintUserOneLine(user User) {
+	color.Printf("m", fmt.Sprintf("%s\n", user.DisplayName))
 }

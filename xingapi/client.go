@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"strconv"
 	)
 
 type UserHandler func(user User)
@@ -39,11 +40,20 @@ func (client *Client)readUsers(reader io.Reader) (Users, error) {
 	return unmarshaler.UnmarshalUsers(reader)
 }
 
-func (client *Client)ContactsList(userID string, handler ContactsHandler) {	
+/**
+ 	https://dev.xing.com/docs/get/users/:user_id/contacts
+ 	limit
+ 	offset
+	order_by
+ */
+func (client *Client) ContactsList(userID string, limit int, offset int, handler ContactsHandler) {	
 	client.contactsHandler = handler
 	consumer := new(OAuthConsumer)
 	client.OAuthConsumer = *consumer
-	client.OAuthConsumer.Get("/v1/users/"+ userID + "/contacts", url.Values{}, client.ContactsResponseHandler)
+	v := url.Values{}
+	v.Set("limit", strconv.Itoa(limit))
+	v.Set("offset", strconv.Itoa(offset))
+	client.OAuthConsumer.Get("/v1/users/"+ userID + "/contacts", v, client.ContactsResponseHandler)
 }
 
 func (client *Client)ContactsResponseHandler(reader io.Reader) {
@@ -65,11 +75,6 @@ func (client *Client) User(id string, handler UserHandler) {
 	consumer := new(OAuthConsumer)
 	client.OAuthConsumer = *consumer
 	client.OAuthConsumer.Get("/v1/users/" + id, url.Values{}, func(reader io.Reader){
-		// robots, err := ioutil.ReadAll(reader)
-		// if err != nil {
-		//     log.Fatal(err)
-		// }
-		// fmt.Printf("%s", robots)
 		var unmarshaler UserUnmarshaler
 		unmarshaler = JSONMarshaler{}
 		user, _ := unmarshaler.UnmarshalUser(reader)

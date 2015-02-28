@@ -23,7 +23,7 @@ func main() {
 			Name:      "Contacts",
 			ShortName: "c",
 			Usage:     "Get contacts for the given user id: c <userId>",
-			Action: app.loadUserAction,
+			Action: app.LoadContactsAction,
 		},
 	}
 	app.Run(os.Args)
