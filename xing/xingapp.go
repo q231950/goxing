@@ -45,7 +45,11 @@ func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
 	if offset + limit > total {
 		limit = limit - (offset + limit - total)
 	}
-	color.Printf("d", fmt.Sprintf("Load users (%d to %d)?\n", offset, offset + limit))
+	hint := ""
+	if offset == 0 {
+		hint = "['y' or 'n']"
+	}
+	color.Printf("d", fmt.Sprintf("Load users (%d to %d)? %s\n", offset, offset + limit, hint))
 
 	client := new(xingapi.Client)
 
@@ -61,7 +65,7 @@ func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
 	} else if text == "n\n" {
 		// exit loop
 	} else {
-		println("Please enter 'y' or 'n'.")
+		println("Please enter 'y' or 'n'...")
 		xa.requestLoadUsers(userId, total, offset)
 	}
 }
