@@ -39,6 +39,14 @@ func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 	})
 }
 
+func (xa *XINGApp)LoadMessagesAction(c *cli.Context) {
+	userId := c.Args().First()
+	client := new(xingapi.Client)
+	client.Messages(userId, func(err error) {
+		
+	})
+}
+
 func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
 
 	limit := 20

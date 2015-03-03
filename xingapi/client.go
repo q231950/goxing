@@ -40,12 +40,6 @@ func (client *Client)readUsers(reader io.Reader) (Users, error) {
 	return unmarshaler.UnmarshalUsers(reader)
 }
 
-/**
- 	https://dev.xing.com/docs/get/users/:user_id/contacts
- 	limit
- 	offset
-	order_by
- */
 func (client *Client) ContactsList(userID string, limit int, offset int, handler ContactsHandler) {	
 	client.contactsHandler = handler
 	consumer := new(OAuthConsumer)
@@ -53,6 +47,7 @@ func (client *Client) ContactsList(userID string, limit int, offset int, handler
 	v := url.Values{}
 	v.Set("limit", strconv.Itoa(limit))
 	v.Set("offset", strconv.Itoa(offset))
+	v.Set("order_by", "last_name")
 	client.OAuthConsumer.Get("/v1/users/"+ userID + "/contacts", v, client.ContactsResponseHandler)
 }
 
@@ -79,6 +74,17 @@ func (client *Client) User(id string, handler UserHandler) {
 		unmarshaler = JSONMarshaler{}
 		user, _ := unmarshaler.UnmarshalUser(reader)
 		handler(user)
+	})
+}
+
+// GET /v1/users/:user_id/conversations
+func (client *Client)Messages(userId string, handler func(err error)) {
+	client.OAuthConsumer.Get("/v1/users/" + userId + "/conversations", url.Values{}, func(reader io.Reader){
+		robots, readError := ioutil.ReadAll(reader)
+		
+		println(fmt.Sprintf("%s", robots))
+
+		handler(readError)
 	})
 }
 

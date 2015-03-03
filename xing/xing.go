@@ -15,7 +15,7 @@ func main() {
 	app.Commands = []cli.Command{
 		{
 			Name:      "me",
-			ShortName: "m",
+			ShortName: "p",
 			Usage:     "Get my profile",
 			Action: app.loadMeAction,
 		},
@@ -24,6 +24,12 @@ func main() {
 			ShortName: "c",
 			Usage:     "Get contacts for the given user id: c <userId>",
 			Action: app.LoadContactsAction,
+		},
+		{
+			Name:      "Messages",
+			ShortName: "m",
+			Usage:     "Get messages for the given user id: c <userId>",
+			Action: app.LoadMessagesAction,
 		},
 	}
 	app.Run(os.Args)
