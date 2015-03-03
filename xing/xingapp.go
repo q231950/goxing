@@ -12,10 +12,11 @@ import (
 
 type XINGApp struct {
 	cli.App
+	s string
 }
 
-func init() {
-	println("init XINGApp")
+func NewApp(cliApp cli.App) *XINGApp {
+	return &XINGApp{*cli.NewApp(), "some string"}
 }
 
 func (xa *XINGApp) loadMeAction(c *cli.Context) {
@@ -39,11 +40,11 @@ func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 	})
 }
 
-func (xa *XINGApp)LoadMessagesAction(c *cli.Context) {
+func (xa *XINGApp) LoadMessagesAction(c *cli.Context) {
 	userId := c.Args().First()
 	client := new(xingapi.Client)
 	client.Messages(userId, func(err error) {
-		
+
 	})
 }
 

@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	app := XINGApp{*cli.NewApp()}
+	app := NewApp(*cli.NewApp())
 	app.Name = "xing"
 	app.Usage = "xing on the command line"
 	app.Author = "Martin Kim Dung-Pham"
