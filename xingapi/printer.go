@@ -24,6 +24,10 @@ func PrintCommand(command string) {
 	color.Printf("c", fmt.Sprintf("%s", command))
 }
 
+func PrintError(err error) {
+	color.Printf("r", fmt.Sprintf("%s", err.Error()))
+}
+
 func  PrintMessageWithParam(message string, param string) {
 	print(message)
 	color.Print("m", fmt.Sprintf("%s%s", param, "\n"))
@@ -35,5 +39,5 @@ func PrintUser(user User) {
 }
 
 func PrintUserOneLine(user User) {
-	color.Printf("m", fmt.Sprintf("%s\n", user.DisplayName))
+	color.Printf("m", fmt.Sprintf("%s <%s>\n", user.DisplayName, user.Id))
 }

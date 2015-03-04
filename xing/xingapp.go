@@ -32,10 +32,14 @@ func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 	client := new(xingapi.Client)
 	
 	// just to get the total
-	client.ContactsList(userId, 0, 0, func(list xingapi.ContactsList) {
-		color.Printf("", fmt.Sprintf("-----------------------------------\n%d Contacts\n", list.Total))
-		if 0 < list.Total {
-			xa.requestLoadUsers(userId, list.Total, 0)
+	client.ContactsList(userId, 0, 0, func(list xingapi.ContactsList, err error) {
+		if err == nil {
+			color.Printf("", fmt.Sprintf("-----------------------------------\n%d Contacts\n", list.Total))
+			if 0 < list.Total {
+				xa.requestLoadUsers(userId, list.Total, 0)
+			}
+		} else {
+			xingapi.PrintError(err)
 		}
 	})
 }
@@ -65,10 +69,14 @@ func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	if text == "y\n" {
-		client.ContactsList(userId, limit, offset, func(list xingapi.ContactsList) {
-			xa.loadUsers(list)
-			if offset+limit < total {
-				xa.requestLoadUsers(userId, total, offset + len(list.UserIds))
+		client.ContactsList(userId, limit, offset, func(list xingapi.ContactsList, err error) {
+			if err == nil {
+				xa.loadUsers(list)
+				if offset+limit < total {
+					xa.requestLoadUsers(userId, total, offset + len(list.UserIds))
+				} 
+			} else {
+				xingapi.PrintError(err)
 			}
 		})
 	} else if text == "n\n" {
@@ -80,7 +88,6 @@ func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
 }
 
 func (xa *XINGApp) loadUsers(list xingapi.ContactsList) {
-	
 	client := new(xingapi.Client)
 	for _, contactUserId := range list.UserIds {
 		client.User(contactUserId, func(user xingapi.User) {
@@ -88,4 +95,3 @@ func (xa *XINGApp) loadUsers(list xingapi.ContactsList) {
 		})
 	}
 }
-

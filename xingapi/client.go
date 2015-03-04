@@ -10,60 +10,43 @@ import (
 	"strconv"
 	)
 
-type UserHandler func(user User)
-type ContactsHandler func(list ContactsList)
+type UserHandler func(User)
+type ContactsHandler func(ContactsList, error)
 
 type Client struct {
 	OAuthConsumer OAuthConsumer
-	meHandler UserHandler
-	contactsHandler ContactsHandler
 }
 
 func (client *Client)Me(handler UserHandler) {
-	client.meHandler = handler
+	var me User
 	consumer := new(OAuthConsumer)
 	client.OAuthConsumer = *consumer
-	client.OAuthConsumer.Get("/v1/users/me", url.Values{}, client.MeResponseHandler)
-}
+	client.OAuthConsumer.Get("/v1/users/me", url.Values{}, func(reader io.Reader) {
+		var unmarshaler UsersUnmarshaler
+		unmarshaler = JSONMarshaler{}
 
-func (client *Client)MeResponseHandler(reader io.Reader) {
-	users, err := client.readUsers(reader)
-	if err == nil {
-		me := users.Users[0]
-		client.meHandler(*me)
-	}
-}
-
-func (client *Client)readUsers(reader io.Reader) (Users, error) {
-	var unmarshaler UsersUnmarshaler
-	unmarshaler = JSONMarshaler{}
-	return unmarshaler.UnmarshalUsers(reader)
+		users, err := unmarshaler.UnmarshalUsers(reader)
+		if err == nil {
+			me = *users.Users[0]
+			handler(me)
+		}
+	})
 }
 
 func (client *Client) ContactsList(userID string, limit int, offset int, handler ContactsHandler) {	
-	client.contactsHandler = handler
 	consumer := new(OAuthConsumer)
 	client.OAuthConsumer = *consumer
 	v := url.Values{}
 	v.Set("limit", strconv.Itoa(limit))
 	v.Set("offset", strconv.Itoa(offset))
 	v.Set("order_by", "last_name")
-	client.OAuthConsumer.Get("/v1/users/"+ userID + "/contacts", v, client.ContactsResponseHandler)
-}
+	client.OAuthConsumer.Get("/v1/users/"+ userID + "/contacts", v, func(reader io.Reader) {
 
-func (client *Client)ContactsResponseHandler(reader io.Reader) {
-	list, err := client.readContactsList(reader)
-	if err == nil {
-		client.contactsHandler(list)
-	} else {
-		println(err.Error())
-	}
-}
-
-func (client *Client)readContactsList(reader io.Reader) (list ContactsList, err error) {
-	var unmarshaler ContactsListUnmarshaler
-	unmarshaler = JSONMarshaler{}
-	return unmarshaler.UnmarshalContactsList(reader)
+		var unmarshaler ContactsListUnmarshaler
+		unmarshaler = JSONMarshaler{}
+		list, err := unmarshaler.UnmarshalContactsList(reader)
+		handler(list, err)
+	})
 }
 
 func (client *Client) User(id string, handler UserHandler) {
