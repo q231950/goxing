@@ -100,7 +100,6 @@ func (xa *XINGApp) loadAndPrintUsers(list xingapi.ContactsList) {
 			} else {
 				xingapi.PrintError(err)
 			}
-			
 		})
 	}
 }

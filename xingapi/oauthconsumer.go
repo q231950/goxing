@@ -8,7 +8,7 @@ import (
 	"io"
 )
 
-type ResponseHandler func(io.Reader)
+type ResponseHandler func(io.Reader, error)
 type AuthenticateHandler func()
 
 type OAuthConsumer struct {
@@ -52,13 +52,12 @@ func (consumer *OAuthConsumer) Get(path string, parameters url.Values, handler R
 			httpClient := new(http.Client)
 			url := "https://api.xing.com" + path
 			credentials := consumer.oauthAuthenticator.OAuthCredentials
-			resp, _ := consumer.oauthAuthenticator.Client.Get(httpClient, &credentials, url, parameters)
+			resp, err := consumer.oauthAuthenticator.Client.Get(httpClient, &credentials, url, parameters)
 			PrintCommand(fmt.Sprintf("GET %s\n", path))
 			PrintResponse(resp)
 			if resp.StatusCode == 200 {
-				handler(resp.Body)
+				handler(resp.Body, err)
 			} 
-
 			defer resp.Body.Close()
 		})
 
