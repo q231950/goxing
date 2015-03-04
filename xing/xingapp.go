@@ -22,8 +22,12 @@ func NewApp(cliApp cli.App) *XINGApp {
 func (xa *XINGApp) loadMeAction(c *cli.Context) {
 
 	client := new(xingapi.Client)	
-	client.Me(func(me xingapi.User) {
-		xingapi.PrintUser(me)
+	client.Me(func(me xingapi.User, err error) {
+		if err == nil {
+			xingapi.PrintUser(me)
+		} else {
+			xingapi.PrintError(err)
+		}
 	})
 }
 
@@ -71,7 +75,7 @@ func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
 	if text == "y\n" {
 		client.ContactsList(userId, limit, offset, func(list xingapi.ContactsList, err error) {
 			if err == nil {
-				xa.loadUsers(list)
+				xa.loadAndPrintUsers(list)
 				if offset+limit < total {
 					xa.requestLoadUsers(userId, total, offset + len(list.UserIds))
 				} 
@@ -87,11 +91,16 @@ func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
 	}
 }
 
-func (xa *XINGApp) loadUsers(list xingapi.ContactsList) {
+func (xa *XINGApp) loadAndPrintUsers(list xingapi.ContactsList) {
 	client := new(xingapi.Client)
 	for _, contactUserId := range list.UserIds {
-		client.User(contactUserId, func(user xingapi.User) {
-			xingapi.PrintUserOneLine(user)
+		client.User(contactUserId, func(user xingapi.User, err error) {
+			if  err == nil {
+				xingapi.PrintUserOneLine(user)
+			} else {
+				xingapi.PrintError(err)
+			}
+			
 		})
 	}
 }

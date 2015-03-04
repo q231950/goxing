@@ -10,7 +10,7 @@ import (
 	"strconv"
 	)
 
-type UserHandler func(User)
+type UserHandler func(User, error)
 type ContactsHandler func(ContactsList, error)
 
 type Client struct {
@@ -28,7 +28,7 @@ func (client *Client)Me(handler UserHandler) {
 		users, err := unmarshaler.UnmarshalUsers(reader)
 		if err == nil {
 			me = *users.Users[0]
-			handler(me)
+			handler(me, err)
 		}
 	})
 }
@@ -55,8 +55,8 @@ func (client *Client) User(id string, handler UserHandler) {
 	client.OAuthConsumer.Get("/v1/users/" + id, url.Values{}, func(reader io.Reader){
 		var unmarshaler UserUnmarshaler
 		unmarshaler = JSONMarshaler{}
-		user, _ := unmarshaler.UnmarshalUser(reader)
-		handler(user)
+		user, err := unmarshaler.UnmarshalUser(reader)
+		handler(user, err)
 	})
 }
 
