@@ -10,7 +10,6 @@ func main() {
 	app.Name = "XING cli"
 	app.Usage = "xing"
 	app.Author = "Martin Kim Dung-Pham"
-	app.Email = "kim.dung-pham@xing.com"
 	app.Version = "0.0.1"
 	app.Commands = []cli.Command{
 		{
