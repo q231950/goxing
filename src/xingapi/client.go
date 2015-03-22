@@ -17,6 +17,10 @@ type Client struct {
 	OAuthConsumer OAuthConsumer
 }
 
+func (client *Client)Name() string {
+	return "XING API client"
+}
+
 func (client *Client)Me(handler UserHandler) {
 	var me User
 	consumer := new(OAuthConsumer)
