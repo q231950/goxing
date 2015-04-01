@@ -68,29 +68,36 @@ func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
 	if offset == 0 {
 		hint = "['y' or 'n']"
 	}
-	color.Printf("d", fmt.Sprintf("Load users (%d to %d)? %s\n", offset, offset+limit, hint))
-
-	client := new(xingapi.Client)
+	color.Printf("d", fmt.Sprintf("Load contacts (%d to %d)? %s\n", offset, offset+limit, hint))
 
 	reader := bufio.NewReader(os.Stdin)
+	xa.handleInputAndLoadContactsForUser(*reader, userId, limit, offset, total)
+}
+
+func (xa *XINGApp) handleInputAndLoadContactsForUser(reader bufio.Reader, userId string, limit int, offset int, total int) {
 	text, _ := reader.ReadString('\n')
 	if text == "y\n" {
-		client.ContactsList(userId, limit, offset, func(list xingapi.ContactsList, err error) {
-			if err == nil {
-				xa.loadAndPrintUsers(list)
-				if offset+limit < total {
-					xa.requestLoadUsers(userId, total, offset+len(list.UserIds))
-				}
-			} else {
-				xingapi.PrintError(err)
-			}
-		})
+		xa.loadUsers(userId, limit, offset, total)
 	} else if text == "n\n" {
 		// exit loop
 	} else {
 		println("Please enter 'y' or 'n'...")
 		xa.requestLoadUsers(userId, total, offset)
 	}
+}
+
+func (xa *XINGApp) loadUsers(userId string, limit int, offset int, total int) {
+	client := new(xingapi.Client)
+	client.ContactsList(userId, limit, offset, func(list xingapi.ContactsList, err error) {
+		if err == nil {
+			xa.loadAndPrintUsers(list)
+			if offset+limit < total {
+				xa.requestLoadUsers(userId, total, offset+len(list.UserIds))
+			}
+		} else {
+			xingapi.PrintError(err)
+		}
+	})
 }
 
 func (xa *XINGApp) loadAndPrintUsers(list xingapi.ContactsList) {
