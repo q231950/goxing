@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"strconv"
 )
@@ -81,12 +80,4 @@ func (client *Client) Messages(userId string, handler func(err error)) {
 
 		handler(readError)
 	})
-}
-
-func (client *Client) Bla(reader io.Reader) {
-	robots, err := ioutil.ReadAll(reader)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%s", robots)
 }
