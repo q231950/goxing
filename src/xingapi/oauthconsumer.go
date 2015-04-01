@@ -53,10 +53,11 @@ func (consumer *OAuthConsumer) Get(path string, parameters url.Values, handler R
 		url := "https://api.xing.com" + path
 		credentials := consumer.oauthAuthenticator.OAuthCredentials
 		resp, err := consumer.oauthAuthenticator.Client.Get(httpClient, &credentials, url, parameters)
-		PrintCommand(fmt.Sprintf("GET %s\n", path))
-		PrintResponse(resp)
 		if resp.StatusCode == 200 {
 			handler(resp.Body, err)
+		} else {
+			PrintCommand(fmt.Sprintf("GET %s\n", path))
+			PrintResponse(resp)
 		}
 		defer resp.Body.Close()
 	})
