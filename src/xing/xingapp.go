@@ -58,17 +58,17 @@ func (xa *XINGApp) LoadMessagesAction(c *cli.Context) {
 	})
 }
 
-func (xa *XINGApp) requestLoadUsers(userId string, total int, offset int) {
+func (xa *XINGApp) requestLoadUsers(request UsersRequest) {
 
-	limit := 20
-	if offset+limit > total {
-		limit = limit - (offset + limit - total)
+	limit := request.Limit
+	if request.Offset+request.Limit > request.Total {
+		limit = request.Limit - (request.Offset + request.Limit - request.Total)
 	}
 	hint := ""
-	if offset == 0 {
+	if request.Offset == 0 {
 		hint = "['y' or 'n']"
 	}
-	color.Printf("d", fmt.Sprintf("Load contacts (%d to %d)? %s\n", offset, offset+limit, hint))
+	color.Printf("d", fmt.Sprintf("Load contacts (%d to %d)? %s\n", request.Offset, request.Offset+limit, hint))
 
 	reader := bufio.NewReader(os.Stdin)
 	xa.handleInputAndLoadContactsForUser(*reader, userId, limit, offset, total)
@@ -102,17 +102,17 @@ func (xa *XINGApp) loadUsers(userId string, limit int, offset int, total int) {
 
 func (xa *XINGApp) loadAndPrintUsers(list xingapi.ContactsList) {
 	client := new(xingapi.Client)
-	var wg sync.WaitGroup
+	var waitGroup sync.WaitGroup
 	for _, contactUserId := range list.UserIds {
-		wg.Add(1)
+		waitGroup.Add(1)
 		go client.User(contactUserId, func(user xingapi.User, err error) {
 			if err == nil {
 				xingapi.PrintUserOneLine(user)
 			} else {
 				xingapi.PrintError(err)
 			}
-			defer wg.Done()
+			defer waitGroup.Done()
 		})
 	}
-	wg.Wait()
+	waitGroup.Wait()
 }
