@@ -42,7 +42,15 @@ func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 		if err == nil {
 			color.Printf("", fmt.Sprintf("-----------------------------------\n%d Contacts\n", list.Total))
 			if 0 < list.Total {
-				xa.requestLoadUsers(userId, list.Total, 0)
+				limit := 20
+				request := xingapi.UsersRequest{userId, limit, 0, list.Total, func(err error) {
+					if err != nil {
+						xingapi.PrintError(err)
+					} else {
+						println("done")
+					}
+				}}
+				xa.requestLoadUsers(request)
 			}
 		} else {
 			xingapi.PrintError(err)
@@ -58,7 +66,7 @@ func (xa *XINGApp) LoadMessagesAction(c *cli.Context) {
 	})
 }
 
-func (xa *XINGApp) requestLoadUsers(request UsersRequest) {
+func (xa *XINGApp) requestLoadUsers(request xingapi.UsersRequest) {
 
 	limit := request.Limit
 	if request.Offset+request.Limit > request.Total {
@@ -71,31 +79,37 @@ func (xa *XINGApp) requestLoadUsers(request UsersRequest) {
 	color.Printf("d", fmt.Sprintf("Load contacts (%d to %d)? %s\n", request.Offset, request.Offset+limit, hint))
 
 	reader := bufio.NewReader(os.Stdin)
-	xa.handleInputAndLoadContactsForUser(*reader, userId, limit, offset, total)
+	newRequest := xingapi.UsersRequest{request.UserId, limit, request.Offset, request.Total, request.Completion}
+	xa.handleInputAndLoadContactsForUser(*reader, newRequest)
 }
 
-func (xa *XINGApp) handleInputAndLoadContactsForUser(reader bufio.Reader, userId string, limit int, offset int, total int) {
+func (xa *XINGApp) handleInputAndLoadContactsForUser(reader bufio.Reader, request xingapi.UsersRequest) {
 	text, _ := reader.ReadString('\n')
 	if text == "y\n" {
-		xa.loadUsers(userId, limit, offset, total)
+		xa.loadUsers(request)
 	} else if text == "n\n" {
 		// exit loop
+		request.Completion(nil)
 	} else {
 		println("Please enter 'y' or 'n'...")
-		xa.requestLoadUsers(userId, total, offset)
+		xa.requestLoadUsers(request)
 	}
 }
 
-func (xa *XINGApp) loadUsers(userId string, limit int, offset int, total int) {
+func (xa *XINGApp) loadUsers(request xingapi.UsersRequest) {
 	client := new(xingapi.Client)
-	client.ContactsList(userId, limit, offset, func(list xingapi.ContactsList, err error) {
+	client.ContactsList(request.UserId, request.Limit, request.Offset, func(list xingapi.ContactsList, err error) {
 		if err == nil {
 			xa.loadAndPrintUsers(list)
-			if offset+limit < total {
-				xa.requestLoadUsers(userId, total, offset+len(list.UserIds))
+			if !request.IsFinal() {
+				newRequest := xingapi.UsersRequest{request.UserId, request.Limit, request.Offset + len(list.UserIds), request.Total, request.Completion}
+				xa.requestLoadUsers(newRequest)
+			} else {
+				// finished final request without errors
+				request.Completion(nil)
 			}
 		} else {
-			xingapi.PrintError(err)
+			request.Completion(err)
 		}
 	})
 }
