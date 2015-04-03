@@ -15,3 +15,5 @@ type UsersRequest struct {
 func (ur *UsersRequest) IsFinal() bool {
 	return ur.Offset+ur.Limit >= ur.Total
 }
+
+//func (ur *UsersRequest) Limit
