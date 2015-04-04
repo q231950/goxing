@@ -2,7 +2,7 @@
 
 package xingapi
 
-type UsersRequestHandler func(err error)
+type UsersRequestHandler func(users []*User, err error)
 
 type UsersRequest struct {
 	UserId     string
@@ -15,5 +15,3 @@ type UsersRequest struct {
 func (ur *UsersRequest) IsFinal() bool {
 	return ur.Offset+ur.Limit >= ur.Total
 }
-
-//func (ur *UsersRequest) Limit

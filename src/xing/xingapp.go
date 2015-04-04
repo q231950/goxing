@@ -32,7 +32,7 @@ func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 	userId := c.Args().First()
 	client := new(xingapi.XINGClient)
 	repo := NewContactRepository(client)
-	repo.Contacts(userId, func(list []xingapi.User, err error) {
+	repo.Contacts(userId, func(list []*xingapi.User, err error) {
 
 	})
 }
