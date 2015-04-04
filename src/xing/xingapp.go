@@ -23,7 +23,7 @@ func NewApp(cliApp cli.App) *XINGApp {
 
 func (xa *XINGApp) loadMeAction(c *cli.Context) {
 
-	client := new(xingapi.Client)
+	client := new(xingapi.XINGClient)
 	client.Me(func(me xingapi.User, err error) {
 		if err == nil {
 			xingapi.PrintUser(me)
@@ -35,7 +35,7 @@ func (xa *XINGApp) loadMeAction(c *cli.Context) {
 
 func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 	userId := c.Args().First()
-	client := new(xingapi.Client)
+	client := new(xingapi.XINGClient)
 
 	// just to get the total
 	client.ContactsList(userId, 0, 0, func(list xingapi.ContactsList, err error) {
@@ -60,7 +60,7 @@ func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 
 func (xa *XINGApp) LoadMessagesAction(c *cli.Context) {
 	userId := c.Args().First()
-	client := new(xingapi.Client)
+	client := new(xingapi.XINGClient)
 	client.Messages(userId, func(err error) {
 
 	})
@@ -97,7 +97,7 @@ func (xa *XINGApp) handleInputAndLoadContactsForUser(reader bufio.Reader, reques
 }
 
 func (xa *XINGApp) loadUsers(request xingapi.UsersRequest) {
-	client := new(xingapi.Client)
+	client := new(xingapi.XINGClient)
 	client.ContactsList(request.UserId, request.Limit, request.Offset, func(list xingapi.ContactsList, err error) {
 		if err == nil {
 			xa.loadAndPrintUsers(list)
@@ -115,7 +115,7 @@ func (xa *XINGApp) loadUsers(request xingapi.UsersRequest) {
 }
 
 func (xa *XINGApp) loadAndPrintUsers(list xingapi.ContactsList) {
-	client := new(xingapi.Client)
+	client := new(xingapi.XINGClient)
 	var waitGroup sync.WaitGroup
 	for _, contactUserId := range list.UserIds {
 		waitGroup.Add(1)

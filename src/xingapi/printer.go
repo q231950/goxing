@@ -1,18 +1,18 @@
-// printer.go 
+// printer.go
 
-package xingapi 
+package xingapi
 
 import (
-	"github.com/str1ngs/ansi/color"
 	"fmt"
+	"github.com/str1ngs/ansi/color"
 	"net/http"
-	)
+)
 
-type Printer struct {}
+type Printer struct{}
 
 func PrintResponse(response *http.Response) {
 	var colorCode string
-	if (response.StatusCode == 200) {
+	if response.StatusCode == 200 {
 		colorCode = "g"
 	} else {
 		colorCode = "r"
@@ -28,13 +28,13 @@ func PrintError(err error) {
 	color.Printf("r", fmt.Sprintf("%s", err.Error()))
 }
 
-func  PrintMessageWithParam(message string, param string) {
+func PrintMessageWithParam(message string, param string) {
 	print(message)
 	color.Print("m", fmt.Sprintf("%s%s", param, "\n"))
 }
 
 func PrintUser(user User) {
-	color.Printf("", fmt.Sprintf("-----------------------------------\n%s <%s>:\n", user.DisplayName, user.Id))
+	color.Printf("", fmt.Sprintf("-----------------------------------\n%s <%s>:\n", user.DisplayName(), user.Id()))
 	color.Printf("d", fmt.Sprintf("Email address:\t\t%s\nDate of birth:\t\t%s\n", user.ActiveEmail, user.Birthdate))
 }
 

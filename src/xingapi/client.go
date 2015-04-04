@@ -12,15 +12,18 @@ import (
 type UserHandler func(User, error)
 type ContactsHandler func(ContactsList, error)
 
-type Client struct {
+type Client interface {
+	User(id string, handler UserHandler)
+	ContactsList(userID string, limit int, offset int, handler ContactsHandler)
+	Me(handler UserHandler)
+	Messages(userId string, handler func(err error))
+}
+
+type XINGClient struct {
 	OAuthConsumer OAuthConsumer
 }
 
-func (client *Client) Name() string {
-	return "XING API client"
-}
-
-func (client *Client) Me(handler UserHandler) {
+func (client *XINGClient) Me(handler UserHandler) {
 	var me User
 	consumer := new(OAuthConsumer)
 	client.OAuthConsumer = *consumer
@@ -38,7 +41,7 @@ func (client *Client) Me(handler UserHandler) {
 	})
 }
 
-func (client *Client) ContactsList(userID string, limit int, offset int, handler ContactsHandler) {
+func (client *XINGClient) ContactsList(userID string, limit int, offset int, handler ContactsHandler) {
 	consumer := new(OAuthConsumer)
 	client.OAuthConsumer = *consumer
 	v := url.Values{}
@@ -57,7 +60,7 @@ func (client *Client) ContactsList(userID string, limit int, offset int, handler
 	})
 }
 
-func (client *Client) User(id string, handler UserHandler) {
+func (client *XINGClient) User(id string, handler UserHandler) {
 	consumer := new(OAuthConsumer)
 	client.OAuthConsumer = *consumer
 	client.OAuthConsumer.Get("/v1/users/"+id, url.Values{}, func(reader io.Reader, err error) {
@@ -72,7 +75,7 @@ func (client *Client) User(id string, handler UserHandler) {
 }
 
 // GET /v1/users/:user_id/conversations
-func (client *Client) Messages(userId string, handler func(err error)) {
+func (client *XINGClient) Messages(userId string, handler func(err error)) {
 	client.OAuthConsumer.Get("/v1/users/"+userId+"/conversations", url.Values{}, func(reader io.Reader, err error) {
 		robots, readError := ioutil.ReadAll(reader)
 
