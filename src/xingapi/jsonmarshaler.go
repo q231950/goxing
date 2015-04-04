@@ -2,9 +2,9 @@
 package xingapi
 
 import (
-	"io"
 	"encoding/json"
-	)
+	"io"
+)
 
 type UsersMarshaler interface {
 	MarshalUsers(writer io.Writer, users Users) error
@@ -15,7 +15,7 @@ type UsersUnmarshaler interface {
 }
 
 type CredentialsMarshaler interface {
-	MarshalCredentials(writer io.Writer, credentials Credentials) error	
+	MarshalCredentials(writer io.Writer, credentials Credentials) error
 }
 
 type CredentialsUnmarshaler interface {
@@ -30,10 +30,7 @@ type UserUnmarshaler interface {
 	UnmarshalUser(reader io.Reader) (User, error)
 }
 
-
-
-
-type JSONMarshaler struct {}
+type JSONMarshaler struct{}
 
 func (JSONMarshaler) MarshalUsers(writer io.Writer, users Users) error {
 	encoder := json.NewEncoder(writer)

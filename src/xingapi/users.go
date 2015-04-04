@@ -1,5 +1,5 @@
 // users.go
-package xingapi 
+package xingapi
 
 type Users struct {
 	Users []*User
