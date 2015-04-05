@@ -30,7 +30,7 @@ func PrintError(err error) {
 
 func PrintMessageWithParam(message string, param string) {
 	print(message)
-	color.Print("m", fmt.Sprintf("%s%s", param, "\n"))
+	color.Print("m", fmt.Sprintf("%s%s", param, ""))
 }
 
 func PrintUser(user User) {

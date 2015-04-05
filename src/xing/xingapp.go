@@ -2,9 +2,9 @@
 package main
 
 import (
-	"xingapi"
-
 	"github.com/codegangsta/cli"
+	"strconv"
+	"xingapi"
 )
 
 type XINGApp struct {
@@ -17,7 +17,6 @@ func NewApp(cliApp cli.App) *XINGApp {
 }
 
 func (xa *XINGApp) loadMeAction(c *cli.Context) {
-
 	client := new(xingapi.XINGClient)
 	client.Me(func(me xingapi.User, err error) {
 		if err == nil {
@@ -32,8 +31,15 @@ func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 	userId := c.Args().First()
 	client := new(xingapi.XINGClient)
 	repo := NewContactRepository(client)
-	repo.Contacts(userId, func(list []*xingapi.User, err error) {
-
+	repo.Contacts(userId, func(users []*xingapi.User, err error) {
+		if err != nil {
+			xingapi.PrintError(err)
+		} else {
+			for index, user := range users {
+				xingapi.PrintMessageWithParam("", strconv.Itoa(index+1)+".")
+				xingapi.PrintUserOneLine(*user)
+			}
+		}
 	})
 }
 
