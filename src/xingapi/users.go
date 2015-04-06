@@ -2,5 +2,5 @@
 package xingapi
 
 type Users struct {
-	Users []*User
+	Users []*XINGUser
 }

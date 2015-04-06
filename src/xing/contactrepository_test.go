@@ -19,7 +19,7 @@ func TestGetContacts(t *testing.T) {
 
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1)
-	repository.Contacts("some user id", func(list []xingapi.User, err error) {
+	repository.Contacts("some user id", func(list []*xingapi.User, err error) {
 		if len(list) != 2 {
 			t.Error("Expected '2' but got '" + strconv.Itoa(len(list)) + "'")
 		}

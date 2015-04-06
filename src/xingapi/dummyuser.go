@@ -3,7 +3,7 @@
 package xingapi
 
 type DummyUser struct {
-	User
+	XINGUser
 }
 
 func (user DummyUser) String() string {

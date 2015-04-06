@@ -34,10 +34,10 @@ func PrintMessageWithParam(message string, param string) {
 }
 
 func PrintUser(user User) {
-	color.Printf("", fmt.Sprintf("-----------------------------------\n%s <%s>:\n", user.DisplayName, user.Id))
-	color.Printf("d", fmt.Sprintf("Email address:\t\t%s\nDate of birth:\t\t%s\n", user.ActiveEmail, user.Birthdate))
+	color.Printf("", fmt.Sprintf("-----------------------------------\n%s <%s>:\n", user.DisplayName(), user.Id()))
+	color.Printf("d", fmt.Sprintf("Email address:\t\t%s\nDate of birth:\t\t%s\n", user.ActiveEmail(), user.Birthdate()))
 }
 
 func PrintUserOneLine(user User) {
-	color.Printf("m", fmt.Sprintf("%s <%s>\n", user.DisplayName, user.Id))
+	color.Printf("m", fmt.Sprintf("%s <%s>\n", user.Birthdate().String(), user.Id()))
 }
