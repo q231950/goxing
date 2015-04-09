@@ -4,7 +4,7 @@ package xingapi
 
 type DummyClient struct {
 	Client
-	Users []User
+	DummyUsers []User
 }
 
 func (client *DummyClient) ContactsList(userID string, limit int, offset int, handler ContactsHandler) {
@@ -15,5 +15,5 @@ func (client *DummyClient) ContactsList(userID string, limit int, offset int, ha
 }
 
 func (client *DummyClient) User(contactUserId string, handler UserHandler) {
-	handler(client.Users[0], nil)
+	handler(client.DummyUsers[0], nil)
 }

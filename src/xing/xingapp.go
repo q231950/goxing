@@ -9,16 +9,19 @@ import (
 
 type XINGApp struct {
 	cli.App
-	s string
+	s                 string
+	client            xingapi.Client
+	contactRepository xingapi.ContactRepository
 }
 
 func NewApp(cliApp cli.App) *XINGApp {
-	return &XINGApp{*cli.NewApp(), "some string"}
+	client := new(xingapi.XINGClient)
+	contactRepository := xingapi.NewContactRepository(client)
+	return &XINGApp{*cli.NewApp(), "some string", client, *contactRepository}
 }
 
 func (xa *XINGApp) loadMeAction(c *cli.Context) {
-	client := new(xingapi.XINGClient)
-	client.Me(func(me xingapi.User, err error) {
+	xa.client.Me(func(me xingapi.User, err error) {
 		if err == nil {
 			xingapi.PrintUser(me)
 		} else {
@@ -29,9 +32,7 @@ func (xa *XINGApp) loadMeAction(c *cli.Context) {
 
 func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 	userId := c.Args().First()
-	client := new(xingapi.XINGClient)
-	repo := NewContactRepository(client)
-	repo.Contacts(userId, func(users []*xingapi.User, err error) {
+	xa.contactRepository.Contacts(userId, func(users []*xingapi.User, err error) {
 		if err != nil {
 			xingapi.PrintError(err)
 		} else {
@@ -45,8 +46,7 @@ func (xa *XINGApp) LoadContactsAction(c *cli.Context) {
 
 func (xa *XINGApp) LoadMessagesAction(c *cli.Context) {
 	userId := c.Args().First()
-	client := new(xingapi.XINGClient)
-	client.Messages(userId, func(err error) {
+	xa.client.Messages(userId, func(err error) {
 
 	})
 }
