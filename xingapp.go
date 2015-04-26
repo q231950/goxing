@@ -3,8 +3,8 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
+	"github.com/q231950/xingapi"
 	"strconv"
-	"xingapi"
 )
 
 type XINGApp struct {
