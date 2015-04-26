@@ -2,8 +2,10 @@
 package xingapi
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -57,7 +59,15 @@ func (consumer *OAuthConsumer) Get(path string, parameters url.Values, handler R
 			handler(resp.Body, err)
 		} else {
 			PrintCommand(fmt.Sprintf("GET %s\n", path))
-			PrintResponse(resp)
+			//contents, _ := ioutil.ReadAll(resp.Body)
+			//fmt.Printf("%s\n", string(contents))
+
+			var apiError APIError
+			responseJSON, _ := ioutil.ReadAll(resp.Body)
+			err := json.Unmarshal(responseJSON, &apiError)
+			if err != nil {
+				fmt.Println(apiError)
+			}
 		}
 		defer resp.Body.Close()
 	})
