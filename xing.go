@@ -1,3 +1,4 @@
+// Package main of xing allows using the XING platform from the command line
 package main
 
 import (
@@ -16,19 +17,19 @@ func main() {
 			Name:      "profile",
 			ShortName: "p",
 			Usage:     "Get my profile",
-			Action: app.loadMeAction,
+			Action:    app.LoadMeAction,
 		},
 		{
 			Name:      "contacts",
 			ShortName: "c",
 			Usage:     "Get contacts for the given user id: c <userId>",
-			Action: app.LoadContactsAction,
+			Action:    app.LoadContactsAction,
 		},
 		{
 			Name:      "messages",
 			ShortName: "m",
 			Usage:     "Get messages for the given user id: c <userId>",
-			Action: app.LoadMessagesAction,
+			Action:    app.LoadMessagesAction,
 		},
 	}
 	app.Run(os.Args)
