@@ -1,3 +1,5 @@
+[![GoDoc](https://godoc.org/github.com/q231950/goxing?status.svg)](https://godoc.org/github.com/q231950/goxing)
+
 # goxing
 Command line interface for using XING, written in Go
 
