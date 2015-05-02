@@ -1,9 +1,10 @@
-// Package main of xing allows using the XING platform from the command line
+// Package goxing allows using the XING platform from the command line
 package main
 
 import (
-	"github.com/codegangsta/cli"
 	"os"
+
+	"github.com/codegangsta/cli"
 )
 
 func main() {

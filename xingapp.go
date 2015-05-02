@@ -1,11 +1,12 @@
-// xingapp.go
-
 package main
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/codegangsta/cli"
 	"github.com/q231950/xingapi"
-	"strconv"
+	"github.com/str1ngs/ansi/color"
 )
 
 // XINGApp encapsulates the client that connects to XING and holds repositories that provide data.
@@ -23,6 +24,7 @@ func NewApp(cliApp cli.App) *XINGApp {
 	return &XINGApp{*cli.NewApp(), client, *contactRepository, nil}
 }
 
+// LoadMeAction is the action to fetch the signed in user
 func (app *XINGApp) LoadMeAction(c *cli.Context) {
 	app.loadMe(func(me xingapi.User, err error) {
 		if err == nil {
@@ -34,12 +36,11 @@ func (app *XINGApp) LoadMeAction(c *cli.Context) {
 	})
 }
 
-// LoadMeAction loads the logged in user
-func (xa *XINGApp) loadMe(handler func(xingapi.User, error)) {
-	if xa.currentUser != nil {
-		handler(xa.currentUser, nil)
+func (app *XINGApp) loadMe(handler func(xingapi.User, error)) {
+	if app.currentUser != nil {
+		handler(app.currentUser, nil)
 	} else {
-		xa.client.Me(func(me xingapi.User, err error) {
+		app.client.Me(func(me xingapi.User, err error) {
 			if err == nil {
 				handler(me, nil)
 			} else {
@@ -52,9 +53,10 @@ func (xa *XINGApp) loadMe(handler func(xingapi.User, error)) {
 // LoadContactsAction loads the contacts of the logged in user
 func (app *XINGApp) LoadContactsAction(c *cli.Context) {
 	app.loadMe(func(me xingapi.User, err error) {
-		xingapi.Print(me.Id())
-		userId := me.Id()
-		app.contactRepository.Contacts(userId, func(users []*xingapi.User, err error) {
+		xingapi.Print(me.ID())
+		userID := me.ID()
+		app.contactRepository.Contacts(userID, func(users []*xingapi.User, err error) {
+			color.Printf("", fmt.Sprintf("-----------------------------------\n%d Contacts\n", len(users)))
 			if err != nil {
 				xingapi.PrintError(err)
 			} else {
@@ -67,9 +69,10 @@ func (app *XINGApp) LoadContactsAction(c *cli.Context) {
 	})
 }
 
-func (xa *XINGApp) LoadMessagesAction(c *cli.Context) {
-	userId := c.Args().First()
-	xa.client.Messages(userId, func(err error) {
+// LoadMessagesAction is the action to load the messages of the signed in user
+func (app *XINGApp) LoadMessagesAction(c *cli.Context) {
+	userID := c.Args().First()
+	app.client.Messages(userID, func(err error) {
 
 	})
 }
