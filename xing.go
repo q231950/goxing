@@ -1,4 +1,7 @@
-// Package goxing allows using the XING platform from the command line
+/*
+Package goxing allows using the XING platform from the command line.
+It relies on xingapi for talking to the XING backend.
+*/
 package main
 
 import (
