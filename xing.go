@@ -25,9 +25,15 @@ func main() {
 		},
 		{
 			Name:      "contacts",
-			ShortName: "c",
-			Usage:     "Get contacts for the given user id: c <userId>",
+			ShortName: "cs",
+			Usage:     "Gets the contacts of the signed in user",
 			Action:    app.LoadContactsAction,
+		},
+		{
+			Name:      "contact",
+			ShortName: "c",
+			Usage:     "Gets the contact with the given name",
+			Action:    app.LoadContactAction,
 		},
 		{
 			Name:      "messages",
