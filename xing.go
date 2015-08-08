@@ -5,12 +5,13 @@ It relies on xingapi for talking to the XING backend.
 package main
 
 import (
-	"os"
-
 	"github.com/codegangsta/cli"
+	"os"
+	"runtime"
 )
 
 func main() {
+	runtime.GOMAXPROCS(4)
 	app := NewApp(*cli.NewApp())
 	app.Name = "XING cli"
 	app.Usage = "xing"
