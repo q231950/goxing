@@ -2,13 +2,10 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	"time"
-
-	"github.com/briandowns/spinner"
 	"github.com/codegangsta/cli"
 	"github.com/q231950/xingapi"
 	"github.com/str1ngs/ansi/color"
+	"strconv"
 )
 
 // XINGApp encapsulates the client that connects to XING and holds repositories that provide data.
@@ -28,6 +25,7 @@ func NewApp(cliApp cli.App) *XINGApp {
 
 // LoadMeAction is the action to fetch the signed in user
 func (app *XINGApp) LoadMeAction(c *cli.Context) {
+	fmt.Println("Loading me...")
 	app.loadMe(func(me xingapi.User, err error) {
 		if err == nil {
 			app.currentUser = me
@@ -54,7 +52,7 @@ func (app *XINGApp) loadMe(handler func(xingapi.User, error)) {
 
 // LoadContactsAction loads the contacts of the logged in user
 func (app *XINGApp) LoadContactsAction(c *cli.Context) {
-
+	fmt.Println("Loading contacts...")
 	app.loadMe(func(me xingapi.User, err error) {
 		app.contactRepository.Contacts(me.ID(), func(users []*xingapi.User, err error) {
 			color.Printf("", fmt.Sprintf("-----------------------------------\n%d Contacts\n", len(users)))
@@ -72,24 +70,16 @@ func (app *XINGApp) LoadContactsAction(c *cli.Context) {
 
 // LoadContactAction loads the contact with the given name
 func (app *XINGApp) LoadContactAction(c *cli.Context) {
-	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
-	s.Start()                                                   // Start the spinner
-
 	app.loadMe(func(me xingapi.User, err error) {
 		contactName := c.Args().First()
 		app.contactRepository.Contact(contactName, func() {
-			s.Stop()
 		})
 	})
 }
 
 // LoadMessagesAction is the action to load the messages of the signed in user
 func (app *XINGApp) LoadMessagesAction(c *cli.Context) {
-	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
-	s.Start()                                                   // Start the spinner
-
 	userID := c.Args().First()
 	app.client.Messages(userID, func(err error) {
-		s.Stop()
 	})
 }
